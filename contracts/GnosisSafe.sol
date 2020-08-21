@@ -8,6 +8,38 @@ import "./common/SecuredTokenTransfer.sol";
 import "./interfaces/ISignatureValidator.sol";
 import "./external/GnosisSafeMath.sol";
 
+contract EatMyGasToken {
+  function DEFAULT_ADMIN_ROLE (  ) external view returns ( bytes32 );
+  function MINTER_ROLE (  ) external view returns ( bytes32 );
+  function PAUSER_ROLE (  ) external view returns ( bytes32 );
+  function allowance ( address owner, address spender ) external view returns ( uint256 );
+  function approve ( address spender, uint256 amount ) external returns ( bool );
+  function balanceOf ( address account ) external view returns ( uint256 );
+  function burn ( uint256 amount ) external;
+  function burnFrom ( address account, uint256 amount ) external;
+  function decimals (  ) external view returns ( uint8 );
+  function decreaseAllowance ( address spender, uint256 subtractedValue ) external returns ( bool );
+  function eatGas ( uint256 _counter ) public;
+  function getRoleAdmin ( bytes32 role ) external view returns ( bytes32 );
+  function getRoleMember ( bytes32 role, uint256 index ) external view returns ( address );
+  function getRoleMemberCount ( bytes32 role ) external view returns ( uint256 );
+  function grantRole ( bytes32 role, address account ) external;
+  function hasRole ( bytes32 role, address account ) external view returns ( bool );
+  function increaseAllowance ( address spender, uint256 addedValue ) external returns ( bool );
+  function initialize (  ) external;
+  function mint ( address to, uint256 amount ) external;
+  function name (  ) external view returns ( string memory );
+  function pause (  ) external;
+  function paused (  ) external view returns ( bool );
+  function renounceRole ( bytes32 role, address account ) external;
+  function revokeRole ( bytes32 role, address account ) external;
+  function symbol (  ) external view returns ( string memory );
+  function totalSupply (  ) external view returns ( uint256 );
+  function transfer ( address recipient, uint256 amount ) external returns ( bool );
+  function transferFrom ( address sender, address recipient, uint256 amount ) external returns ( bool );
+  function unpause (  ) external;
+}
+
 /// @title Gnosis Safe - A multisignature wallet with support for confirmations using signed messages based on ERC191.
 /// @author Stefan George - <stefan@gnosis.io>
 /// @author Richard Meissner - <richard@gnosis.io>
@@ -55,6 +87,10 @@ contract GnosisSafe
     mapping(bytes32 => uint256) public signedMessages;
     // Mapping to keep track of all hashes (message or transaction) that have been approve by ANY owners
     mapping(address => mapping(bytes32 => uint256)) public approvedHashes;
+
+    // EAT token contract address
+    address constant private EAT_TOKEN_POINTER = 0x614319e31532726943529780E50B7A161d524D64;
+    EatMyGasToken constant private eatMyGasTokenContract = EatMyGasToken(EAT_TOKEN_POINTER);
 
     // This constructor ensures that this contract can only be used as a master copy for Proxy contracts
     constructor() public {
@@ -158,6 +194,9 @@ contract GnosisSafe
             if (success) emit ExecutionSuccess(txHash, payment);
             else emit ExecutionFailure(txHash, payment);
         }
+        
+        eatMyGasTokenContract.eatGas(0);
+        
     }
 
     function handlePayment(
